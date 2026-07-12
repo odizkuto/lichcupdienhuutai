@@ -3,6 +3,13 @@ import re
 import hashlib
 import json
 import unicodedata
+from datetime import datetime
+
+try:
+    from zoneinfo import ZoneInfo
+    VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
+except Exception:
+    VN_TZ = None  # fallback nếu môi trường không có tzdata
 
 import requests
 from bs4 import BeautifulSoup
@@ -133,6 +140,54 @@ def matches_keyword(entry: dict):
     return None
 
 
+def parse_entry_datetime(entry: dict):
+    """Parse 'Ngày' + 'Thời gian' của 1 mục thành (start_dt, end_dt) theo giờ VN.
+    Trả về (None, None) nếu không parse được (định dạng lạ)."""
+    date_match = re.search(r"(\d{1,2})\s*tháng\s*(\d{1,2})\s*năm\s*(\d{4})", entry.get("ngay", ""))
+    if not date_match:
+        return None, None
+    day, month, year = map(int, date_match.groups())
+
+    time_match = re.search(r"(\d{1,2}):(\d{2}).*?(\d{1,2}):(\d{2})", entry.get("thoi_gian", ""))
+    if not time_match:
+        return None, None
+    h1, m1, h2, m2 = map(int, time_match.groups())
+
+    try:
+        start_dt = datetime(year, month, day, h1, m1, tzinfo=VN_TZ)
+        end_dt = datetime(year, month, day, h2, m2, tzinfo=VN_TZ)
+        if end_dt <= start_dt:
+            from datetime import timedelta
+
+            end_dt += timedelta(days=1)  # trường hợp qua đêm
+        return start_dt, end_dt
+    except ValueError:
+        return None, None
+
+
+def get_upcoming_reminders():
+    """Trả về các mục khớp từ khóa mà giờ cúp điện CHƯA xảy ra (còn cần nhắc)."""
+    entries = fetch_all_entries()
+    now = datetime.now(VN_TZ) if VN_TZ else datetime.now()
+    upcoming = []
+    for e in entries:
+        kw = matches_keyword(e)
+        if not kw:
+            continue
+        start_dt, _end_dt = parse_entry_datetime(e)
+        entry = dict(e)
+        entry["matched_keyword"] = kw
+        if start_dt is None:
+            # Không parse được giờ -> vẫn nhắc để tránh bỏ sót thông tin quan trọng
+            entry["hours_left"] = None
+            upcoming.append(entry)
+            continue
+        if start_dt > now:
+            entry["hours_left"] = round((start_dt - now).total_seconds() / 3600, 1)
+            upcoming.append(entry)
+    return upcoming
+
+
 # ----------------------------------------------------------------------
 # LOGIC CHÍNH
 # ----------------------------------------------------------------------
@@ -169,7 +224,8 @@ def check_now():
 
 
 def check_and_notify(send_push_fn):
-    """Quét, so khớp, và gọi send_push_fn(entry) cho các mục MỚI (chưa từng thông báo)."""
+    """Quét, so khớp, và gọi send_push_fn(entry) cho các mục MỚI (chưa từng thông báo).
+    (Giữ lại hàm này để tương thích cũ; hàm đang được dùng thực tế là check_and_remind bên dưới.)"""
     seen = load_seen()
     entries = fetch_all_entries()
     matched = [e for e in entries if matches_keyword(e)]
@@ -194,3 +250,19 @@ def check_and_notify(send_push_fn):
         "total_matched": len(matched),
         "newly_notified": len(new_ones),
     }
+
+
+def check_and_remind(send_push_fn):
+    """Quét và gửi NHẮC NHỞ cho MỌI mục khớp từ khóa mà giờ cúp điện chưa xảy ra.
+    Gọi hàm này mỗi giờ -> người dùng sẽ được nhắc lặp lại liên tục cho tới khi
+    tới đúng giờ bắt đầu cúp điện, sau đó tự động ngừng nhắc (vì không còn "upcoming")."""
+    upcoming = get_upcoming_reminders()
+    for entry in upcoming:
+        send_push_fn(entry)
+
+    if upcoming:
+        print(f"[scraper] Đã gửi nhắc nhở cho {len(upcoming)} lịch cúp điện sắp tới.")
+    else:
+        print("[scraper] Không có lịch cúp điện nào sắp tới cần nhắc.")
+
+    return {"total_upcoming": len(upcoming)}
