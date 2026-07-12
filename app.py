@@ -50,6 +50,20 @@ def run_check_now():
         return jsonify({"error": "Lỗi khi quét/gửi thông báo"}), 500
 
 
+@app.route("/api/test-notification", methods=["POST"])
+def test_notification():
+    """Gửi 1 thông báo giả để test push hoạt động, không phụ thuộc dữ liệu thật."""
+    try:
+        push_utils.send_to_all(
+            title="⚡ Test thông báo",
+            body="Đây là tin nhắn test — nếu bạn thấy cái này nghĩa là push hoạt động tốt!",
+        )
+        return jsonify({"ok": True, "message": "Đã gửi thông báo test"})
+    except Exception as err:
+        print("[api/test-notification] Lỗi:", err)
+        return jsonify({"error": str(err)}), 500
+
+
 def scheduled_job():
     print("[cron] Bắt đầu quét theo lịch...")
     try:
