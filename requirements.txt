@@ -1,5 +1,6 @@
-Flask
-requests
-beautifulsoup4
-gunicorn
-apscheduler
+Flask==3.0.3
+requests==2.32.3
+beautifulsoup4==4.12.3
+pywebpush==2.0.0
+APScheduler==3.10.4
+gunicorn==22.0.0
