@@ -29,9 +29,9 @@ function renderResults(entries) {
     .map(
       (e) => `
     <div class="entry">
-      <div><b>${e.ngay}</b> — ${e.thoiGian}</div>
-      <div>${e.khuVuc}</div>
-      <div style="color:#94a3b8; font-size:0.8rem;">${e.dienLuc} • ${e.trangThai}</div>
+      <div><b>${e.ngay}</b> — ${e.thoi_gian}</div>
+      <div>${e.khu_vuc}</div>
+      <div style="color:#94a3b8; font-size:0.8rem;">${e.dien_luc} • ${e.trang_thai}</div>
     </div>`
     )
     .join('');
