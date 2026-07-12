@@ -69,7 +69,17 @@ def send_to_all(title: str, body: str):
 
 
 def send_entry_notification(entry: dict):
+    hours_left = entry.get("hours_left")
+    if hours_left is not None:
+        if hours_left < 1:
+            countdown = f"còn {int(hours_left * 60)} phút nữa"
+        else:
+            countdown = f"còn khoảng {hours_left} tiếng nữa"
+        body = f"{entry['ngay']} ({entry['thoi_gian']}) — {countdown}\n{entry['khu_vuc']}"
+    else:
+        body = f"{entry['ngay']} ({entry['thoi_gian']}): {entry['khu_vuc']}"
+
     send_to_all(
-        title="⚡ Cảnh báo lịch cúp điện",
-        body=f"{entry['ngay']} ({entry['thoi_gian']}): {entry['khu_vuc']}",
+        title="⚡ Nhắc lịch cúp điện",
+        body=body,
     )
