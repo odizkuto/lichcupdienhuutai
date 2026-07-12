@@ -43,12 +43,11 @@ def check():
 @app.route("/api/run-check-now", methods=["POST"])
 def run_check_now():
     try:
-        result = scraper.check_and_notify(push_utils.send_entry_notification)
+        result = scraper.check_and_remind(push_utils.send_entry_notification)
         return jsonify({"ok": True, **result})
     except Exception as err:
         print("[api/run-check-now] Lỗi:", err)
         return jsonify({"error": "Lỗi khi quét/gửi thông báo"}), 500
-
 
 @app.route("/api/test-notification", methods=["POST"])
 def test_notification():
@@ -75,10 +74,9 @@ def debug_subs():
 def scheduled_job():
     print("[cron] Bắt đầu quét theo lịch...")
     try:
-        scraper.check_and_notify(push_utils.send_entry_notification)
+        scraper.check_and_remind(push_utils.send_entry_notification)
     except Exception as err:
         print("[cron] Lỗi:", err)
-
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(scheduled_job, "cron", minute=0)  # chạy đúng đầu mỗi giờ
