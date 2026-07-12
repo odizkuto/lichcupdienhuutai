@@ -54,14 +54,22 @@ def run_check_now():
 def test_notification():
     """Gửi 1 thông báo giả để test push hoạt động, không phụ thuộc dữ liệu thật."""
     try:
+        subs_count = len(push_utils.load_subs())
         push_utils.send_to_all(
             title="⚡ Test thông báo",
             body="Đây là tin nhắn test — nếu bạn thấy cái này nghĩa là push hoạt động tốt!",
         )
-        return jsonify({"ok": True, "message": "Đã gửi thông báo test"})
+        return jsonify({"ok": True, "message": "Đã gửi thông báo test", "subscribersOnServer": subs_count})
     except Exception as err:
         print("[api/test-notification] Lỗi:", err)
         return jsonify({"error": str(err)}), 500
+
+
+@app.route("/api/debug-subs")
+def debug_subs():
+    """Xem nhanh server hiện đang lưu bao nhiêu thiết bị đăng ký."""
+    subs = push_utils.load_subs()
+    return jsonify({"count": len(subs)})
 
 
 def scheduled_job():
