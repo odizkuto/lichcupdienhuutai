@@ -72,6 +72,15 @@ function getStartTime(entry) {
   return new Date(Date.UTC(year, month - 1, day, hour - 7, min));
 }
 
+function getStatusBadgeHtml(trangThai) {
+  if (!trangThai) return '';
+  const t = trangThai.trim();
+  let cls = 'status-badge';
+  if (t === 'Đã thực hiện') cls += ' status-done';
+  else if (t === 'Đã duyệt') cls += ' status-approved';
+  return `<span class="${cls}">${t}</span>`;
+}
+
 function getCountdownHtml(entry) {
   const start = getStartTime(entry);
   if (!start) return '';
@@ -97,7 +106,10 @@ function renderEntries(container, entries, showCountdown) {
       <div class="entry" style="${delay}">
         <div><b>${e.ngay}</b> — ${e.thoi_gian}</div>
         <div>${e.khu_vuc}</div>
-        <div style="color:#94a3b8;font-size:0.78rem">${e.dien_luc} • ${e.trang_thai}</div>
+        <div class="entry-meta">
+          <span style="color:#94a3b8;font-size:0.78rem">${e.dien_luc}</span>
+          ${getStatusBadgeHtml(e.trang_thai)}
+        </div>
         ${countdown}
       </div>`;
   }).join('');
