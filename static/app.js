@@ -65,15 +65,17 @@ function renderEntries(container, entries, showCountdown) {
     container.innerHTML = '<div class="empty">Không có lịch cúp điện nào.</div>';
     return;
   }
-  container.innerHTML = entries.map((e) => {
+  container.innerHTML = entries.map((e, i) => {
     let countdown = '';
     if (showCountdown && e.hours_left != null) {
       countdown = e.hours_left < 1
         ? `<div class="countdown">⏰ Còn ${Math.round(e.hours_left * 60)} phút nữa</div>`
         : `<div class="countdown">⏰ Còn khoảng ${e.hours_left} tiếng nữa</div>`;
     }
+    // delay tăng dần tạo hiệu ứng sóng (mỗi ô cách nhau 60ms)
+    const delay = `animation-delay: ${i * 60}ms`;
     return `
-      <div class="entry">
+      <div class="entry" style="${delay}">
         <div><b>${e.ngay}</b> — ${e.thoi_gian}</div>
         <div>${e.khu_vuc}</div>
         <div style="color:#94a3b8;font-size:0.78rem">${e.dien_luc} • ${e.trang_thai}</div>
