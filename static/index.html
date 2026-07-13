@@ -135,6 +135,37 @@
     cursor: pointer;
   }
   .btn-share:active { opacity: 0.7; }
+
+  /* Hiệu ứng chảy từ trên xuống khi tải trang */
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .entry {
+    animation: slideDown 0.4s ease both;
+  }
+
+  /* Hover phóng to nhẹ cho ô lịch */
+  .entry {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
+  }
+  .entry:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  }
+
+  /* Hover cho nút chia sẻ và nút thông báo */
+  .btn-share, .btn-secondary {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .btn-share:hover, .btn-secondary:hover {
+    transform: scale(1.06);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .btn-share:active, .btn-secondary:active {
+    transform: scale(0.97);
+  }
 </style>
 </head>
 <body>
