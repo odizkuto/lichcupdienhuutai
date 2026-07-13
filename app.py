@@ -40,6 +40,17 @@ def check():
         return jsonify({"error": "Lỗi khi quét dữ liệu"}), 500
 
 
+@app.route("/api/check-all")
+def check_all():
+    """Trả về TOÀN BỘ lịch cúp điện huyện Phú Tân, không lọc từ khóa."""
+    try:
+        entries = scraper.fetch_all_entries()
+        return jsonify({"ok": True, "count": len(entries), "entries": entries})
+    except Exception as err:
+        print("[api/check-all] Lỗi:", err)
+        return jsonify({"error": "Lỗi khi quét dữ liệu"}), 500
+
+
 @app.route("/api/run-check-now", methods=["POST"])
 def run_check_now():
     try:
