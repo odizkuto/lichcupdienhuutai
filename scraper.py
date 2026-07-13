@@ -38,8 +38,6 @@ KEYWORDS = [
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 SEEN_FILE = os.path.join(DATA_DIR, "seen.json")
 
-LABELS = ["Điện lực:", "Ngày:", "Thời gian:", "Khu vực:", "Lý do:", "Trạng thái:"]
-
 # ----------------------------------------------------------------------
 # TIỆN ÍCH
 # ----------------------------------------------------------------------
@@ -108,39 +106,52 @@ def html_to_text(html: str) -> str:
 
 
 def parse_entries(text: str):
-    """Parse các block Điện lực/Ngày/Thời gian/Khu vực/Lý do/Trạng thái."""
+    """Parse các block Điện lực/Ngày/Thời gian/Khu vực/Lý do/Trạng thái.
+    Hỗ trợ cả 2 dạng: label trên 1 dòng riêng, value trên dòng kế tiếp."""
     lines = text.split("\n")
     entries = []
     i = 0
     n = len(lines)
 
+    # Map label -> key trong dict kết quả
+    LABEL_MAP = {
+        "Điện lực:": "dien_luc",
+        "Ngày:": "ngay",
+        "Thời gian:": "thoi_gian",
+        "Khu vực:": "khu_vuc",
+        "Lý do:": "ly_do",
+        "Trạng thái:": "trang_thai",
+    }
+    ALL_LABELS = set(LABEL_MAP.keys())
+    ORDERED_LABELS = list(LABEL_MAP.keys())
+
     while i < n:
-        if lines[i] == LABELS[0]:
+        if lines[i] == ORDERED_LABELS[0]:  # "Điện lực:"
             cursor = i
             values = {}
             ok = True
-            for idx, label in enumerate(LABELS):
+
+            for label in ORDERED_LABELS:
                 if cursor >= n or lines[cursor] != label:
                     ok = False
                     break
                 cursor += 1
-                next_label = LABELS[idx + 1] if idx + 1 < len(LABELS) else None
+                # Gom các dòng value cho tới khi gặp label tiếp theo hoặc hết
                 value_lines = []
-                while cursor < n and lines[cursor] not in LABELS:
+                while cursor < n and lines[cursor] not in ALL_LABELS:
                     value_lines.append(lines[cursor])
                     cursor += 1
                 values[label] = " ".join(value_lines).strip()
-            if ok:
-                entries.append(
-                    {
-                        "dien_luc": values.get("Điện lực:", ""),
-                        "ngay": values.get("Ngày:", ""),
-                        "thoi_gian": values.get("Thời gian:", ""),
-                        "khu_vuc": values.get("Khu vực:", ""),
-                        "ly_do": values.get("Lý do:", ""),
-                        "trang_thai": values.get("Trạng thái:", ""),
-                    }
-                )
+
+            if ok and values.get("Ngày:"):  # phải có ít nhất trường Ngày
+                entries.append({
+                    "dien_luc":  values.get("Điện lực:", ""),
+                    "ngay":      values.get("Ngày:", ""),
+                    "thoi_gian": values.get("Thời gian:", ""),
+                    "khu_vuc":   values.get("Khu vực:", ""),
+                    "ly_do":     values.get("Lý do:", ""),
+                    "trang_thai":values.get("Trạng thái:", ""),
+                })
                 i = cursor
                 continue
         i += 1
