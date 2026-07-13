@@ -194,7 +194,8 @@
     cursor: pointer;
     white-space: nowrap;
   }
-  .btn-secondary { background: #334155; color: var(--text); }
+  .btn-secondary { background: var(--accent); color: #1e1b0a; }
+  .btn-secondary:disabled { background: #4b5563; color: var(--muted); cursor: default; opacity: 0.8; }
   .status { font-size: 0.83rem; color: var(--muted); }
   .status.on { color: var(--green); }
   .status.off { color: var(--red); }
