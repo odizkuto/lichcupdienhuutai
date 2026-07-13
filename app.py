@@ -49,6 +49,7 @@ def run_check_now():
         print("[api/run-check-now] Lỗi:", err)
         return jsonify({"error": "Lỗi khi quét/gửi thông báo"}), 500
 
+
 @app.route("/api/test-notification", methods=["POST"])
 def test_notification():
     """Gửi 1 thông báo giả để test push hoạt động, không phụ thuộc dữ liệu thật."""
@@ -77,6 +78,7 @@ def scheduled_job():
         scraper.check_and_remind(push_utils.send_entry_notification)
     except Exception as err:
         print("[cron] Lỗi:", err)
+
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(scheduled_job, "cron", minute=0)  # chạy đúng đầu mỗi giờ
