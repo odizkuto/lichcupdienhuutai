@@ -104,6 +104,31 @@
   }
   .empty { text-align: center; color: var(--muted); padding: 24px 0; font-size: 0.9rem; }
 
+  /* Skeleton loading */
+  .skeleton {
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    background: #0f1729;
+    border-left: 3px solid #1e293b;
+  }
+  .skeleton-line {
+    height: 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, #1e293b 25%, #2c3b52 37%, #1e293b 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+  }
+  .skeleton-line:last-child { margin-bottom: 0; }
+  .skeleton-line.w-60 { width: 60%; }
+  .skeleton-line.w-90 { width: 90%; }
+  .skeleton-line.w-40 { width: 40%; }
+  @keyframes shimmer {
+    0%   { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+  }
+
   /* Nút thông báo */
   .notify-bar {
     max-width: 1100px;
@@ -211,7 +236,11 @@
           <span class="badge badge-blue" id="badgeAll">…</span>
         </div>
         <div class="entries-wrap">
-          <div id="resultsAll"><div class="empty">Đang tải...</div></div>
+          <div id="resultsAll">
+            <div class="skeleton"><div class="skeleton-line w-60"></div><div class="skeleton-line w-90"></div><div class="skeleton-line w-40"></div></div>
+            <div class="skeleton"><div class="skeleton-line w-60"></div><div class="skeleton-line w-90"></div><div class="skeleton-line w-40"></div></div>
+            <div class="skeleton"><div class="skeleton-line w-60"></div><div class="skeleton-line w-90"></div><div class="skeleton-line w-40"></div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -224,7 +253,10 @@
           <span class="badge" id="badgeMine">…</span>
         </div>
         <div class="entries-wrap">
-          <div id="resultsMine"><div class="empty">Đang tải...</div></div>
+          <div id="resultsMine">
+            <div class="skeleton"><div class="skeleton-line w-60"></div><div class="skeleton-line w-90"></div><div class="skeleton-line w-40"></div></div>
+            <div class="skeleton"><div class="skeleton-line w-60"></div><div class="skeleton-line w-90"></div><div class="skeleton-line w-40"></div></div>
+          </div>
         </div>
       </div>
     </div>
