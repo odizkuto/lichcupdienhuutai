@@ -42,7 +42,7 @@ async function loadMine() {
 }
 
 function showLastUpdated(timeStr) {
-  if (lastUpdatedEl) lastUpdatedEl.textContent = `⏱ Cập nhật lúc ${timeStr}`;
+  if (lastUpdatedEl) lastUpdatedEl.innerHTML = `<span class="live-dot"></span>⏱ Cập nhật lúc ${timeStr}`;
 }
 
 // Nút chia sẻ
