@@ -1,32 +1,20 @@
 const resultsEl = document.getElementById('results');
 const pushStatusEl = document.getElementById('pushStatus');
-const btnCheck = document.getElementById('btnCheck');
 const btnSubscribe = document.getElementById('btnSubscribe');
 
-// ---------- Hàm quét dùng chung (gọi khi tải trang VÀ khi bấm nút) ----------
-async function runCheck({ showLoading = true } = {}) {
-  if (showLoading) {
-    btnCheck.disabled = true;
-    btnCheck.textContent = 'Đang kiểm tra...';
-    resultsEl.innerHTML = '<div class="empty">Đang tải dữ liệu...</div>';
-  }
+// Tự động quét ngay khi mở trang
+runCheck();
+
+async function runCheck() {
+  resultsEl.innerHTML = '<div class="empty">Đang tải dữ liệu...</div>';
   try {
     const res = await fetch('/api/check');
     const data = await res.json();
     renderResults(data.entries || []);
   } catch (err) {
     resultsEl.innerHTML = '<div class="empty">Có lỗi xảy ra, thử lại sau.</div>';
-  } finally {
-    btnCheck.disabled = false;
-    btnCheck.textContent = '🔍 Kiểm tra lịch cúp điện';
   }
 }
-
-// Tự động quét ngay khi mở trang, không cần bấm nút
-runCheck();
-
-// Vẫn giữ nút để người dùng chủ động kiểm tra lại bất cứ lúc nào
-btnCheck.addEventListener('click', () => runCheck());
 
 function renderResults(entries) {
   if (entries.length === 0) {
