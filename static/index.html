@@ -9,6 +9,7 @@
     --bg: #0f172a;
     --card: #1e293b;
     --accent: #facc15;
+    --accent2: #38bdf8;
     --text: #e2e8f0;
     --muted: #94a3b8;
     --green: #22c55e;
@@ -20,70 +21,139 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
-    padding: 24px 16px 60px;
+    padding: 20px 16px 60px;
   }
-  .wrap { max-width: 560px; margin: 0 auto; }
-  h1 {
-    font-size: 1.6rem;
-    text-align: center;
-    margin-bottom: 4px;
+  h1 { font-size: 1.5rem; text-align: center; margin: 0 0 4px; }
+  .subtitle { text-align: center; color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
+
+  /* Layout 2 cột trên desktop, 1 cột trên mobile */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0 auto 16px;
   }
-  .subtitle {
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.9rem;
-    margin-bottom: 24px;
+  @media (max-width: 700px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .col-mine { order: 1; }
+    .col-all  { order: 2; }
   }
+
+  .col-header {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0 0 8px;
+    margin-bottom: 8px;
+    border-bottom: 2px solid;
+  }
+  .col-mine .col-header { color: var(--accent); border-color: var(--accent); }
+  .col-all .col-header  { color: var(--accent2); border-color: var(--accent2); }
+
   .card {
     background: var(--card);
     border-radius: 14px;
-    padding: 18px;
-    margin-bottom: 16px;
+    padding: 16px;
+    height: 100%;
   }
-  button {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 8px;
-  }
-  .btn-primary { background: var(--accent); color: #1e1b0a; }
-  .btn-secondary { background: #334155; color: var(--text); }
-  .status { font-size: 0.85rem; color: var(--muted); margin-top: 8px; text-align: center; }
-  .status.on { color: var(--green); }
-  .status.off { color: var(--red); }
+  .entries-wrap { max-height: 70vh; overflow-y: auto; }
+
   .entry {
     border-left: 3px solid var(--accent);
-    padding: 10px 12px;
-    margin-bottom: 10px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
     background: #0f1729;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
+  .col-all .entry { border-left-color: var(--accent2); }
   .entry b { color: var(--accent); }
-  .empty { text-align: center; color: var(--muted); padding: 20px 0; }
+  .col-all .entry b { color: var(--accent2); }
+  .countdown { color: var(--accent); font-size: 0.78rem; margin-top: 3px; }
+  .empty { text-align: center; color: var(--muted); padding: 24px 0; font-size: 0.9rem; }
+
+  /* Nút thông báo */
+  .notify-bar {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .card-notify {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-secondary { background: #334155; color: var(--text); }
+  .status { font-size: 0.83rem; color: var(--muted); }
+  .status.on { color: var(--green); }
+  .status.off { color: var(--red); }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #1e1b0a;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 99px;
+    padding: 1px 7px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .badge-blue { background: var(--accent2); color: #0f172a; }
 </style>
 </head>
 <body>
-<div class="wrap">
   <h1>⚡ Power Notify</h1>
-  <div class="subtitle">
-    Theo dõi lịch cúp điện<br/>
-    Xã Phú An • Xã Tân Trung • Đường Cồn • Quốc lộ 80B
+  <div class="subtitle">Theo dõi lịch cúp điện • Huyện Phú Tân, An Giang</div>
+
+  <div class="main-grid">
+    <!-- Cột trái: toàn bộ huyện Phú Tân -->
+    <div class="col-all">
+      <div class="card">
+        <div class="col-header">
+          🗺️ Toàn huyện Phú Tân
+          <span class="badge badge-blue" id="badgeAll">…</span>
+        </div>
+        <div class="entries-wrap">
+          <div id="resultsAll"><div class="empty">Đang tải...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cột phải: khu vực của tôi -->
+    <div class="col-mine">
+      <div class="card">
+        <div class="col-header">
+          📍 Khu vực của tôi
+          <span class="badge" id="badgeMine">…</span>
+        </div>
+        <div class="entries-wrap">
+          <div id="resultsMine"><div class="empty">Đang tải...</div></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="card">
-    <div id="results"><div class="empty">Đang tải dữ liệu...</div></div>
+  <!-- Thanh thông báo -->
+  <div class="notify-bar">
+    <div class="card-notify">
+      <button class="btn-secondary" id="btnSubscribe">🔔 Bật thông báo</button>
+      <div class="status" id="pushStatus">Tự động quét mỗi giờ, gửi thông báo khi có lịch cúp điện trùng khu vực của bạn.</div>
+    </div>
   </div>
-
-  <div class="card">
-    <button class="btn-secondary" id="btnSubscribe">🔔 Bật thông báo trên điện thoại</button>
-    <div class="status" id="pushStatus">Trang sẽ tự động quét mỗi giờ và báo cho bạn nếu có lịch cúp điện trùng khu vực.</div>
-  </div>
-</div>
 
 <script src="/app.js"></script>
 </body>
