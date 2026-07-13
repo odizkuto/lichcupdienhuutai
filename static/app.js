@@ -1,9 +1,11 @@
-const pushStatusEl = document.getElementById('pushStatus');
+const pushStatusEl  = document.getElementById('pushStatus');
 const btnSubscribe  = document.getElementById('btnSubscribe');
 const resultsAllEl  = document.getElementById('resultsAll');
 const resultsMineEl = document.getElementById('resultsMine');
 const badgeAll      = document.getElementById('badgeAll');
 const badgeMine     = document.getElementById('badgeMine');
+const lastUpdatedEl = document.getElementById('lastUpdated');
+const btnShare      = document.getElementById('btnShare');
 
 // Tự động tải cả 2 cột khi mở trang
 loadAll();
@@ -17,6 +19,7 @@ async function loadAll() {
     const entries = data.entries || [];
     badgeAll.textContent = entries.length;
     renderEntries(resultsAllEl, entries, false);
+    if (data.last_updated) showLastUpdated(data.last_updated);
   } catch {
     resultsAllEl.innerHTML = '<div class="empty">Có lỗi, thử lại sau.</div>';
     badgeAll.textContent = '!';
@@ -31,11 +34,31 @@ async function loadMine() {
     const entries = data.entries || [];
     badgeMine.textContent = entries.length;
     renderEntries(resultsMineEl, entries, true);
+    if (data.last_updated) showLastUpdated(data.last_updated);
   } catch {
     resultsMineEl.innerHTML = '<div class="empty">Có lỗi, thử lại sau.</div>';
     badgeMine.textContent = '!';
   }
 }
+
+function showLastUpdated(timeStr) {
+  if (lastUpdatedEl) lastUpdatedEl.textContent = `⏱ Cập nhật lúc ${timeStr}`;
+}
+
+// Nút chia sẻ
+btnShare.addEventListener('click', async () => {
+  const url = window.location.href;
+  const text = '⚡ Theo dõi lịch cúp điện Huyện Phú Tân - An Giang tại đây:';
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Power Notify - Lịch Cúp Điện', text, url });
+    } catch {}
+  } else {
+    await navigator.clipboard.writeText(url);
+    btnShare.textContent = '✅ Đã sao chép link!';
+    setTimeout(() => (btnShare.textContent = '🔗 Chia sẻ trang này'), 2000);
+  }
+});
 
 function renderEntries(container, entries, showCountdown) {
   if (entries.length === 0) {
