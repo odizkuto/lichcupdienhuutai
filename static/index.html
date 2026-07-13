@@ -44,35 +44,37 @@
   }
   .main-grid, .card, .entries-wrap, .entry { min-width: 0; }
   @media (max-width: 700px) {
-    .main-grid { grid-template-columns: 1fr; }
+    .main-grid { grid-template-columns: 1fr; gap: 12px; }
     .col-mine { order: 1; }
     .col-all  { order: 2; }
 
-    body { padding: 14px 10px 40px; }
-    h1 { font-size: 1.2rem; }
-    .subtitle { font-size: 0.75rem; margin-bottom: 14px; }
+    body { padding: 12px 8px 40px; }
+    h1 { font-size: 1.1rem; }
+    .subtitle { font-size: 0.7rem; margin-bottom: 12px; }
 
-    .card { padding: 12px; border-radius: 12px; }
-    .col-header { font-size: 0.72rem; padding-bottom: 6px; margin-bottom: 6px; }
-    .badge { font-size: 0.65rem; padding: 1px 6px; }
+    .card { padding: 10px; border-radius: 12px; }
+    .col-header { font-size: 0.68rem; padding-bottom: 6px; margin-bottom: 6px; }
+    .badge { font-size: 0.62rem; padding: 1px 6px; }
 
-    .entry { padding: 7px 9px; font-size: 0.78rem; border-radius: 7px; }
-    .entry-meta { gap: 4px; }
-    .status-badge { font-size: 0.65rem; padding: 2px 7px; }
-    .countdown { font-size: 0.72rem; }
+    .entry { padding: 7px 8px; font-size: 0.72rem; border-radius: 7px; line-height: 1.35; }
+    .entry-meta { flex-direction: column; align-items: flex-start; gap: 3px; }
+    .entry-meta > span:first-child { font-size: 0.68rem !important; }
+    .status-badge { font-size: 0.62rem; padding: 2px 7px; align-self: flex-start; }
+    .countdown { font-size: 0.68rem; }
 
-    .empty-safe { padding: 32px 12px 22px; }
-    .empty-safe-icon { width: 54px; height: 54px; margin-bottom: 10px; }
-    .empty-safe-text { font-size: 0.8rem; max-width: 190px; }
+    .empty-safe { padding: 28px 10px 20px; }
+    .empty-safe-icon { width: 48px; height: 48px; margin-bottom: 8px; }
+    .empty-safe-text { font-size: 0.76rem; max-width: 180px; }
 
-    .card-notify { padding: 11px 14px; gap: 10px; }
-    button { padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; }
-    .status { font-size: 0.75rem; }
+    .card-notify { padding: 10px 12px; gap: 8px; }
+    button { padding: 8px 14px; font-size: 0.8rem; border-radius: 8px; }
+    .status { font-size: 0.7rem; }
 
-    .footer { font-size: 0.75rem; }
-    #lastUpdated { font-size: 0.72rem; }
-    .btn-share { padding: 7px 13px; font-size: 0.78rem; }
+    .footer { font-size: 0.7rem; }
+    #lastUpdated { font-size: 0.68rem; }
+    .btn-share { padding: 7px 12px; font-size: 0.74rem; }
   }
+
 
   .col-header {
     font-size: 0.8rem;
