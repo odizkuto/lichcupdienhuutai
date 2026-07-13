@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from flask import Flask, jsonify, request, send_from_directory
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -7,6 +8,9 @@ import scraper
 import push_utils
 
 app = Flask(__name__, static_folder="static", static_url_path="")
+
+# Lưu thời gian quét gần nhất
+last_updated = {"time": None}
 
 
 @app.route("/")
@@ -34,7 +38,7 @@ def subscribe():
 def check():
     try:
         matched = scraper.check_now()
-        return jsonify({"ok": True, "count": len(matched), "entries": matched, "keywords": scraper.KEYWORDS})
+        return jsonify({"ok": True, "count": len(matched), "entries": matched, "keywords": scraper.KEYWORDS, "last_updated": last_updated["time"]})
     except Exception as err:
         print("[api/check] Lỗi:", err)
         return jsonify({"error": "Lỗi khi quét dữ liệu"}), 500
@@ -42,10 +46,9 @@ def check():
 
 @app.route("/api/check-all")
 def check_all():
-    """Trả về TOÀN BỘ lịch cúp điện huyện Phú Tân, không lọc từ khóa."""
     try:
         entries = scraper.fetch_all_entries()
-        return jsonify({"ok": True, "count": len(entries), "entries": entries})
+        return jsonify({"ok": True, "count": len(entries), "entries": entries, "last_updated": last_updated["time"]})
     except Exception as err:
         print("[api/check-all] Lỗi:", err)
         return jsonify({"error": "Lỗi khi quét dữ liệu"}), 500
@@ -55,6 +58,7 @@ def check_all():
 def run_check_now():
     try:
         result = scraper.check_and_remind(push_utils.send_entry_notification)
+        last_updated["time"] = datetime.now().strftime("%H:%M %d/%m/%Y")
         return jsonify({"ok": True, **result})
     except Exception as err:
         print("[api/run-check-now] Lỗi:", err)
@@ -65,7 +69,6 @@ def run_check_now():
 def test_notification():
     try:
         subs_count = len(push_utils.load_subs())
-        # Gửi thông báo giả giống y như thật (có ngày, giờ, khu vực, đếm ngược)
         fake_entry = {
             "ngay": "15 tháng 7 năm 2026",
             "thoi_gian": "Từ 08:00 đến 16:30",
@@ -83,7 +86,6 @@ def test_notification():
 
 @app.route("/api/debug-subs")
 def debug_subs():
-    """Xem nhanh server hiện đang lưu bao nhiêu thiết bị đăng ký."""
     subs = push_utils.load_subs()
     return jsonify({"count": len(subs)})
 
@@ -92,15 +94,15 @@ def scheduled_job():
     print("[cron] Bắt đầu quét theo lịch...")
     try:
         scraper.check_and_remind(push_utils.send_entry_notification)
+        last_updated["time"] = datetime.now().strftime("%H:%M %d/%m/%Y")
     except Exception as err:
         print("[cron] Lỗi:", err)
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(scheduled_job, "cron", minute=0)  # chạy đúng đầu mỗi giờ
+scheduler.add_job(scheduled_job, "cron", minute=0)
 scheduler.start()
 
-# Quét ngay 1 lần khi app khởi động (không cần đợi tới đầu giờ)
 scheduled_job()
 
 if __name__ == "__main__":
