@@ -1,96 +1,99 @@
-const resultsEl = document.getElementById('results');
 const pushStatusEl = document.getElementById('pushStatus');
-const btnSubscribe = document.getElementById('btnSubscribe');
+const btnSubscribe  = document.getElementById('btnSubscribe');
+const resultsAllEl  = document.getElementById('resultsAll');
+const resultsMineEl = document.getElementById('resultsMine');
+const badgeAll      = document.getElementById('badgeAll');
+const badgeMine     = document.getElementById('badgeMine');
 
-// Tự động quét ngay khi mở trang
-runCheck();
+// Tự động tải cả 2 cột khi mở trang
+loadAll();
+loadMine();
 
-async function runCheck() {
-  resultsEl.innerHTML = '<div class="empty">Đang tải dữ liệu...</div>';
+async function loadAll() {
+  resultsAllEl.innerHTML = '<div class="empty">Đang tải...</div>';
   try {
-    const res = await fetch('/api/check');
+    const res  = await fetch('/api/check-all');
     const data = await res.json();
-    renderResults(data.entries || []);
-  } catch (err) {
-    resultsEl.innerHTML = '<div class="empty">Có lỗi xảy ra, thử lại sau.</div>';
+    const entries = data.entries || [];
+    badgeAll.textContent = entries.length;
+    renderEntries(resultsAllEl, entries, false);
+  } catch {
+    resultsAllEl.innerHTML = '<div class="empty">Có lỗi, thử lại sau.</div>';
+    badgeAll.textContent = '!';
   }
 }
 
-function renderResults(entries) {
+async function loadMine() {
+  resultsMineEl.innerHTML = '<div class="empty">Đang tải...</div>';
+  try {
+    const res  = await fetch('/api/check');
+    const data = await res.json();
+    const entries = data.entries || [];
+    badgeMine.textContent = entries.length;
+    renderEntries(resultsMineEl, entries, true);
+  } catch {
+    resultsMineEl.innerHTML = '<div class="empty">Có lỗi, thử lại sau.</div>';
+    badgeMine.textContent = '!';
+  }
+}
+
+function renderEntries(container, entries, showCountdown) {
   if (entries.length === 0) {
-    resultsEl.innerHTML = '<div class="empty">Không có lịch cúp điện nào khớp khu vực của bạn.</div>';
+    container.innerHTML = '<div class="empty">Không có lịch cúp điện nào.</div>';
     return;
   }
-  resultsEl.innerHTML = entries
-    .map((e) => {
-      const countdown =
-        e.hours_left != null
-          ? e.hours_left < 1
-            ? `<div style="color:#facc15; font-size:0.8rem;">⏰ Còn ${Math.round(e.hours_left * 60)} phút nữa</div>`
-            : `<div style="color:#facc15; font-size:0.8rem;">⏰ Còn khoảng ${e.hours_left} tiếng nữa</div>`
-          : '';
-      return `
-    <div class="entry">
-      <div><b>${e.ngay}</b> — ${e.thoi_gian}</div>
-      <div>${e.khu_vuc}</div>
-      <div style="color:#94a3b8; font-size:0.8rem;">${e.dien_luc} • ${e.trang_thai}</div>
-      ${countdown}
-    </div>`;
-    })
-    .join('');
+  container.innerHTML = entries.map((e) => {
+    let countdown = '';
+    if (showCountdown && e.hours_left != null) {
+      countdown = e.hours_left < 1
+        ? `<div class="countdown">⏰ Còn ${Math.round(e.hours_left * 60)} phút nữa</div>`
+        : `<div class="countdown">⏰ Còn khoảng ${e.hours_left} tiếng nữa</div>`;
+    }
+    return `
+      <div class="entry">
+        <div><b>${e.ngay}</b> — ${e.thoi_gian}</div>
+        <div>${e.khu_vuc}</div>
+        <div style="color:#94a3b8;font-size:0.78rem">${e.dien_luc} • ${e.trang_thai}</div>
+        ${countdown}
+      </div>`;
+  }).join('');
 }
 
-// ---------- Đăng ký push notification ----------
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = atob(base64);
-  return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+// ---------- Push notification ----------
+function urlBase64ToUint8Array(b64) {
+  const pad = '='.repeat((4 - b64.length % 4) % 4);
+  const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
 async function subscribeToPush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    pushStatusEl.textContent = 'Trình duyệt của bạn không hỗ trợ thông báo đẩy.';
-    pushStatusEl.className = 'status off';
-    return;
+    pushStatusEl.textContent = 'Trình duyệt không hỗ trợ thông báo đẩy.';
+    pushStatusEl.className = 'status off'; return;
   }
-
-  const permission = await Notification.requestPermission();
-  if (permission !== 'granted') {
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted') {
     pushStatusEl.textContent = 'Bạn chưa cho phép nhận thông báo.';
-    pushStatusEl.className = 'status off';
-    return;
+    pushStatusEl.className = 'status off'; return;
   }
-
   const reg = await navigator.serviceWorker.register('/sw.js');
-  const { publicKey } = await fetch('/api/vapid-public-key').then((r) => r.json());
-
-  const sub = await reg.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(publicKey),
-  });
-
-  await fetch('/api/subscribe', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(sub),
-  });
-
-  pushStatusEl.textContent = '✅ Đã bật thông báo! Bạn sẽ nhận cảnh báo khi có lịch cúp điện trùng khu vực.';
+  const { publicKey } = await fetch('/api/vapid-public-key').then(r => r.json());
+  const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) });
+  await fetch('/api/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sub) });
+  pushStatusEl.textContent = '✅ Đã bật thông báo! Sẽ nhận cảnh báo khi có lịch cúp điện trùng khu vực.';
   pushStatusEl.className = 'status on';
   btnSubscribe.textContent = '🔔 Đã bật thông báo';
   btnSubscribe.disabled = true;
 }
 
-btnSubscribe.addEventListener('click', () => {
-  subscribeToPush().catch((err) => {
+btnSubscribe.addEventListener('click', () =>
+  subscribeToPush().catch(err => {
     console.error(err);
     pushStatusEl.textContent = 'Có lỗi khi đăng ký thông báo.';
     pushStatusEl.className = 'status off';
-  });
-});
+  })
+);
 
-// Kiểm tra trạng thái đăng ký hiện có khi tải trang
 (async () => {
   if ('serviceWorker' in navigator) {
     const reg = await navigator.serviceWorker.getRegistration();
