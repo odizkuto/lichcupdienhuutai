@@ -16,14 +16,19 @@
     --red: #ef4444;
   }
   * { box-sizing: border-box; }
-  html, body { overflow-x: hidden; }
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
     padding: 20px 16px 60px;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   h1 { font-size: 1.5rem; text-align: center; margin: 0 0 4px; }
   .subtitle { text-align: center; color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
@@ -34,8 +39,10 @@
     grid-template-columns: 1fr 1fr;
     gap: 16px;
     max-width: 1100px;
+    width: 100%;
     margin: 0 auto 16px;
   }
+  .main-grid, .card, .entries-wrap, .entry { min-width: 0; }
   @media (max-width: 700px) {
     .main-grid { grid-template-columns: 1fr; }
     .col-mine { order: 1; }
@@ -84,8 +91,10 @@
     border-radius: 14px;
     padding: 16px;
     height: 100%;
+    width: 100%;
+    max-width: 100%;
   }
-  .entries-wrap { max-height: 70vh; overflow-y: auto; }
+  .entries-wrap { max-height: 70vh; overflow-y: auto; overflow-x: hidden; width: 100%; }
 
   .entry {
     border-left: 3px solid var(--accent);
@@ -94,6 +103,8 @@
     background: #0f1729;
     border-radius: 8px;
     font-size: 0.85rem;
+    width: 100%;
+    max-width: 100%;
   }
   .col-all .entry { border-left-color: var(--accent2); }
   .entry b { color: var(--accent); }
@@ -107,6 +118,11 @@
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 2px;
+    min-width: 0;
+  }
+  .entry-meta > span:first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .status-badge {
     display: inline-flex;
@@ -118,6 +134,7 @@
     border-radius: 99px;
     white-space: nowrap;
     letter-spacing: 0.01em;
+    flex-shrink: 0;
   }
   .status-dot {
     width: 7px;
