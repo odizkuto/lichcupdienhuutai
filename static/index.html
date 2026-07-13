@@ -113,6 +113,28 @@
     vertical-align: middle;
   }
   .badge-blue { background: var(--accent2); color: #0f172a; }
+  .footer {
+    max-width: 1100px;
+    margin: 16px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 4px;
+  }
+  #lastUpdated { color: var(--muted); font-size: 0.8rem; }
+  .btn-share {
+    padding: 8px 16px;
+    background: #334155;
+    color: var(--text);
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-share:active { opacity: 0.7; }
 </style>
 </head>
 <body>
@@ -153,6 +175,13 @@
       <button class="btn-secondary" id="btnSubscribe">🔔 Bật thông báo</button>
       <div class="status" id="pushStatus">Tự động quét mỗi giờ, gửi thông báo khi có lịch cúp điện trùng khu vực của bạn.</div>
     </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div id="lastUpdated">⏱ Đang tải...</div>
+    <button class="btn-share" id="btnShare">🔗 Chia sẻ trang này</button>
+    <div style="color:#475569; font-size:0.75rem;">Dữ liệu từ <a href="https://lichcupdien.org/lich-cup-dien-phu-tan-an-giang" target="_blank" style="color:#475569;">lichcupdien.org</a></div>
   </div>
 
 <script src="/app.js"></script>
