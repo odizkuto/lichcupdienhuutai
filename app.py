@@ -1,5 +1,10 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+VN_TZ = timezone(timedelta(hours=7))
+
+def vn_now():
+    return datetime.now(VN_TZ).strftime("%H:%M %d/%m/%Y")
 
 from flask import Flask, jsonify, request, send_from_directory
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -58,7 +63,7 @@ def check_all():
 def run_check_now():
     try:
         result = scraper.check_and_remind(push_utils.send_entry_notification)
-        last_updated["time"] = datetime.now().strftime("%H:%M %d/%m/%Y")
+        last_updated["time"] = vn_now()
         return jsonify({"ok": True, **result})
     except Exception as err:
         print("[api/run-check-now] Lỗi:", err)
@@ -94,7 +99,7 @@ def scheduled_job():
     print("[cron] Bắt đầu quét theo lịch...")
     try:
         scraper.check_and_remind(push_utils.send_entry_notification)
-        last_updated["time"] = datetime.now().strftime("%H:%M %d/%m/%Y")
+        last_updated["time"] = vn_now()
     except Exception as err:
         print("[cron] Lỗi:", err)
 
