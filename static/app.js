@@ -3,11 +3,13 @@ const pushStatusEl = document.getElementById('pushStatus');
 const btnCheck = document.getElementById('btnCheck');
 const btnSubscribe = document.getElementById('btnSubscribe');
 
-// ---------- Nút kiểm tra thủ công ----------
-btnCheck.addEventListener('click', async () => {
-  btnCheck.disabled = true;
-  btnCheck.textContent = 'Đang kiểm tra...';
-  resultsEl.innerHTML = '<div class="empty">Đang tải dữ liệu...</div>';
+// ---------- Hàm quét dùng chung (gọi khi tải trang VÀ khi bấm nút) ----------
+async function runCheck({ showLoading = true } = {}) {
+  if (showLoading) {
+    btnCheck.disabled = true;
+    btnCheck.textContent = 'Đang kiểm tra...';
+    resultsEl.innerHTML = '<div class="empty">Đang tải dữ liệu...</div>';
+  }
   try {
     const res = await fetch('/api/check');
     const data = await res.json();
@@ -18,7 +20,13 @@ btnCheck.addEventListener('click', async () => {
     btnCheck.disabled = false;
     btnCheck.textContent = '🔍 Kiểm tra lịch cúp điện';
   }
-});
+}
+
+// Tự động quét ngay khi mở trang, không cần bấm nút
+runCheck();
+
+// Vẫn giữ nút để người dùng chủ động kiểm tra lại bất cứ lúc nào
+btnCheck.addEventListener('click', () => runCheck());
 
 function renderResults(entries) {
   if (entries.length === 0) {
@@ -26,14 +34,21 @@ function renderResults(entries) {
     return;
   }
   resultsEl.innerHTML = entries
-    .map(
-      (e) => `
+    .map((e) => {
+      const countdown =
+        e.hours_left != null
+          ? e.hours_left < 1
+            ? `<div style="color:#facc15; font-size:0.8rem;">⏰ Còn ${Math.round(e.hours_left * 60)} phút nữa</div>`
+            : `<div style="color:#facc15; font-size:0.8rem;">⏰ Còn khoảng ${e.hours_left} tiếng nữa</div>`
+          : '';
+      return `
     <div class="entry">
       <div><b>${e.ngay}</b> — ${e.thoi_gian}</div>
       <div>${e.khu_vuc}</div>
       <div style="color:#94a3b8; font-size:0.8rem;">${e.dien_luc} • ${e.trang_thai}</div>
-    </div>`
-    )
+      ${countdown}
+    </div>`;
+    })
     .join('');
 }
 
