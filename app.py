@@ -63,14 +63,19 @@ def run_check_now():
 
 @app.route("/api/test-notification", methods=["POST"])
 def test_notification():
-    """Gửi 1 thông báo giả để test push hoạt động, không phụ thuộc dữ liệu thật."""
     try:
         subs_count = len(push_utils.load_subs())
-        push_utils.send_to_all(
-            title="⚡ Test thông báo",
-            body="Đây là tin nhắn test — nếu bạn thấy cái này nghĩa là push hoạt động tốt!",
-        )
-        return jsonify({"ok": True, "message": "Đã gửi thông báo test", "subscribersOnServer": subs_count})
+        # Gửi thông báo giả giống y như thật (có ngày, giờ, khu vực, đếm ngược)
+        fake_entry = {
+            "ngay": "15 tháng 7 năm 2026",
+            "thoi_gian": "Từ 08:00 đến 16:30",
+            "khu_vuc": "Một phần xã Phú An (đường Cồn Tân Trung) - tỉnh An Giang",
+            "dien_luc": "Điện lực Huyện Phú Tân",
+            "trang_thai": "Đã duyệt",
+            "hours_left": 2.5,
+        }
+        push_utils.send_entry_notification(fake_entry)
+        return jsonify({"ok": True, "subscribersOnServer": subs_count})
     except Exception as err:
         print("[api/test-notification] Lỗi:", err)
         return jsonify({"error": str(err)}), 500
