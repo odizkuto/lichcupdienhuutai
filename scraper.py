@@ -94,13 +94,21 @@ def html_to_text(html: str) -> str:
         "Để mọi người thuận tiện tra cứu",
         "Việc xảy ra tình trạng mất điện",
         "Khi có sự cố về điện tại địa phương",
+        "Thông báo lịch cúp điện Huyện",
     ]
     cut_at = len(lines)
     for i, line in enumerate(lines):
         if any(line.startswith(m) for m in CUT_MARKERS):
             cut_at = i
             break
-    lines = lines[:cut_at]
+
+    # Lọc bỏ các dòng rác lẻ tẻ nằm giữa các mục lịch
+    JUNK_LINES = {
+        "Thông tin đang cập nhật",
+        "*Thông tin đang cập nhật",
+        "* Thông tin đang cập nhật",
+    }
+    lines = [l for l in lines[:cut_at] if l not in JUNK_LINES]
 
     return "\n".join(lines)
 
@@ -142,6 +150,8 @@ def parse_entries(text: str):
                     value_lines.append(lines[cursor])
                     cursor += 1
                 values[label] = " ".join(value_lines).strip()
+                # Bỏ icon emoji phía đầu (vd: "🔔 Kế hoạch" -> "Kế hoạch")
+                values[label] = re.sub(r'^[\U00010000-\U0010ffff\u2600-\u26FF\u2700-\u27BF\s]+', '', values[label]).strip()
 
             if ok and values.get("Ngày:"):  # phải có ít nhất trường Ngày
                 entries.append({
@@ -230,6 +240,11 @@ def fetch_all_entries():
             entries = parse_entries(text)
             for e in entries:
                 e["source_url"] = url
+            # Chỉ giữ mục có trạng thái "Đã duyệt" hoặc "Đã thực hiện"
+            entries = [
+                e for e in entries
+                if any(s in e.get("trang_thai", "") for s in ["Đã duyệt", "Đã thực hiện"])
+            ]
             all_entries.extend(entries)
         except Exception as err:
             print(f"[scraper] Lỗi khi lấy dữ liệu từ {url}: {err}")
