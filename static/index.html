@@ -220,7 +220,29 @@
     gap: 10px;
     padding: 0 4px;
   }
-  #lastUpdated { color: var(--muted); font-size: 0.8rem; }
+  #lastUpdated {
+    color: var(--muted);
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4ade80;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .live-dot::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: inherit;
+    animation: pulse-ring 1.4s ease-out infinite;
+  }
   .btn-share {
     padding: 8px 16px;
     background: #334155;
@@ -314,7 +336,7 @@
 
   <!-- Footer -->
   <div class="footer">
-    <div id="lastUpdated">⏱ Đang tải...</div>
+    <div id="lastUpdated"><span class="live-dot"></span>⏱ Đang tải...</div>
     <button class="btn-share" id="btnShare">🔗 Chia sẻ trang này</button>
     <div style="color:#475569; font-size:0.75rem;">Dữ liệu từ <a href="https://lichcupdien.org/lich-cup-dien-phu-tan-an-giang" target="_blank" style="color:#475569;">lichcupdien.org</a></div>
   </div>
