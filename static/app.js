@@ -91,7 +91,7 @@ function getStatusBadgeHtml(trangThai) {
   let cls = 'status-badge';
   if (t === 'Đã thực hiện') cls += ' status-done';
   else if (t === 'Đã duyệt') cls += ' status-approved';
-  return `<span class="${cls}">${t}</span>`;
+  return `<span class="${cls}"><span class="status-dot"></span>${t}</span>`;
 }
 
 function getCountdownHtml(entry) {
