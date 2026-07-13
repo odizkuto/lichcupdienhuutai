@@ -12,7 +12,7 @@ loadAll();
 loadMine();
 
 async function loadAll() {
-  resultsAllEl.innerHTML = '<div class="empty">Đang tải...</div>';
+  resultsAllEl.innerHTML = getSkeletonHtml(4);
   try {
     const res  = await fetch('/api/check-all');
     const data = await res.json();
@@ -27,7 +27,7 @@ async function loadAll() {
 }
 
 async function loadMine() {
-  resultsMineEl.innerHTML = '<div class="empty">Đang tải...</div>';
+  resultsMineEl.innerHTML = getSkeletonHtml(3);
   try {
     const res  = await fetch('/api/check');
     const data = await res.json();
@@ -70,6 +70,19 @@ function getStartTime(entry) {
   const [, day, month, year] = d.map(Number);
   const [, hour, min] = t.map(Number);
   return new Date(Date.UTC(year, month - 1, day, hour - 7, min));
+}
+
+function getSkeletonHtml(count) {
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    html += `
+      <div class="skeleton">
+        <div class="skeleton-line w-60"></div>
+        <div class="skeleton-line w-90"></div>
+        <div class="skeleton-line w-40"></div>
+      </div>`;
+  }
+  return html;
 }
 
 function getStatusBadgeHtml(trangThai) {
