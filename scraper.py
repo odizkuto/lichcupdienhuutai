@@ -89,6 +89,21 @@ def html_to_text(html: str) -> str:
     text = soup.get_text()
     lines = [l.strip() for l in text.splitlines()]
     lines = [l for l in lines if l]
+
+    # Cắt bỏ phần text SEO rác bắt đầu từ dòng "Nguồn:" hoặc "Để mọi người thuận tiện..."
+    CUT_MARKERS = [
+        "Nguồn: Thông tin từ các trang web chính thức",
+        "Để mọi người thuận tiện tra cứu",
+        "Việc xảy ra tình trạng mất điện",
+        "Khi có sự cố về điện tại địa phương",
+    ]
+    cut_at = len(lines)
+    for i, line in enumerate(lines):
+        if any(line.startswith(m) for m in CUT_MARKERS):
+            cut_at = i
+            break
+    lines = lines[:cut_at]
+
     return "\n".join(lines)
 
 
