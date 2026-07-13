@@ -33,7 +33,7 @@ async function loadMine() {
     const data = await res.json();
     const entries = data.entries || [];
     badgeMine.textContent = entries.length;
-    renderEntries(resultsMineEl, entries, true);
+    renderEntries(resultsMineEl, entries, true, true);
     if (data.last_updated) showLastUpdated(data.last_updated);
   } catch {
     resultsMineEl.innerHTML = '<div class="empty">Có lỗi, thử lại sau.</div>';
@@ -106,9 +106,22 @@ function getCountdownHtml(entry) {
     : `<div class="countdown">⏰ Còn khoảng ${hours} tiếng nữa</div>`;
 }
 
-function renderEntries(container, entries, showCountdown) {
+function getEmptyMineHtml() {
+  return `
+    <div class="empty-safe">
+      <svg class="empty-safe-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 30L32 10L56 30" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M14 26V52C14 53.1 14.9 54 16 54H48C49.1 54 50 53.1 50 52V26" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="41" cy="45" r="11" fill="#0f1729" stroke="currentColor" stroke-width="3"/>
+        <path d="M36 45L39.5 48.5L46.5 41" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="empty-safe-text">An toàn. Không có lịch cúp điện nào cho khu vực của bạn.</div>
+    </div>`;
+}
+
+function renderEntries(container, entries, showCountdown, isMine) {
   if (entries.length === 0) {
-    container.innerHTML = '<div class="empty">Không có lịch cúp điện nào.</div>';
+    container.innerHTML = isMine ? getEmptyMineHtml() : '<div class="empty">Không có lịch cúp điện nào.</div>';
     return;
   }
   container.innerHTML = entries.map((e, i) => {
